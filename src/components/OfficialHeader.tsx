@@ -23,10 +23,11 @@ export const OfficialHeader: React.FC<OfficialHeaderProps> = ({
             className="h-20 w-auto object-contain"
           />
         )}
-        <div className="flex flex-col text-right">
-          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">المملكة المغربية</span>
-          <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">وزارة التربية الوطنية والتعليم الأولي والرياضة</span>
-          <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">المديرية الإقليمية الرباط</span>
+        <div className="flex flex-col text-right space-y-0.5">
+          <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{settings.kingdom || 'المملكة المغربية'}</span>
+          <span className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">{settings.ministry || 'وزارة التربية الوطنية والتعليم الأولي والتكوين المهني والتأهيل'}</span>
+          <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">{settings.delegation || 'المديرية الإقليمية الرباط'}</span>
+          <span className="text-[12px] font-black text-slate-900 dark:text-white pt-0.5">{settings.schoolName || 'مدرسة الفرصة الثانية الجيل الجديد يعقوب المنصور'}</span>
         </div>
       </div>
 
@@ -42,11 +43,8 @@ export const OfficialHeader: React.FC<OfficialHeaderProps> = ({
                   className="h-16 w-auto object-contain"
                 />
               )}
-              <h1 className="text-xl font-black text-slate-900 dark:text-white leading-tight">
-                {settings.schoolName}
-              </h1>
             </div>
-            <div className="px-3 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold rounded-full border border-emerald-100 dark:border-emerald-900/60">
+            <div className="px-3.5 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-full border border-emerald-200 dark:border-emerald-800">
               السنة الدراسية: {settings.schoolYear}
             </div>
           </>
@@ -56,8 +54,8 @@ export const OfficialHeader: React.FC<OfficialHeaderProps> = ({
       {/* Left Side: Association Info */}
       <div className="flex items-center gap-4">
         <div className="flex flex-col text-left items-end">
-          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">الهيئة المغربية للتربية والتنمية</span>
-          <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">مدرسة الفرصة الثانية الجيل الجديد يعقوب المنصور</span>
+          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">الجمعية المسيرة / الهيئة المرافقة</span>
+          <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">مدرسة الفرصة الثانية الجيل الجديد</span>
         </div>
         {settings.associationLogoDataURL && (
           <img 

@@ -193,10 +193,10 @@ export const AnimatorCardModal: React.FC<AnimatorCardModalProps> = ({
       <body>
         <div class="header-box">
           <div style="text-align: right; line-height: 1.35; font-size: 9.5pt;">
-            <div style="font-weight: bold; font-size: 10.5pt;">المملكة المغربية</div>
-            <div style="font-weight: bold; color: #334155;">وزارة التربية الوطنية والتعليم الأولي والرياضة</div>
-            <div style="color: #475569;">الأكاديمية الجهوية للتربية والتكوين جهة الرباط - سلا - القنيطرة</div>
-            <div style="color: #475569;">المديرية الإقليمية الرباط</div>
+            <div style="font-weight: bold; font-size: 10.5pt;">${settings.kingdom || 'المملكة المغربية'}</div>
+            <div style="font-weight: bold; color: #334155;">${settings.ministry || 'وزارة التربية الوطنية والتعليم الأولي والتكوين المهني والتأهيل'}</div>
+            <div style="color: #475569;">${settings.delegation || 'المديرية الإقليمية الرباط'}</div>
+            <div style="font-weight: bold; color: #0f172a;">${settings.schoolName || 'مدرسة الفرصة الثانية الجيل الجديد يعقوب المنصور'}</div>
           </div>
           <div style="text-align: center;">
             ${settings.ministryLogoDataURL ? `<img src="${settings.ministryLogoDataURL}" style="height: 60px; max-width: 140px; object-fit: contain;" alt="شعار الوزارة" />` : ''}

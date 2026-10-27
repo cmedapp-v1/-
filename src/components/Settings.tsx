@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Settings as SettingsIcon, 
   Save, 
@@ -14,7 +14,15 @@ import {
   Info,
   ShieldCheck,
   AppWindow,
-  UserCheck
+  UserCheck,
+  Lock,
+  KeyRound,
+  Eye,
+  EyeOff,
+  User,
+  Users,
+  Shield,
+  AlertCircle
 } from 'lucide-react';
 import { ConfirmDialog } from './ConfirmDialog';
 import { 
@@ -31,13 +39,16 @@ import {
 } from '../types';
 import { exportFullBackup, restoreFullBackup, resetToDemoData } from '../utils/storage';
 import { DEFAULT_VIOLATION_TYPES } from '../utils/initialData';
+import { getStoredAdminCredentials, changeAdminPassword, changeAdminUsername } from '../utils/auth';
 import { Backup } from './Backup';
 import { DataCorrection } from './DataCorrection';
 import { AnimatorManagement } from './AnimatorManagement';
+import { AdminUsersManagement } from './AdminUsersManagement';
 
-export type SettingsSubTab = 'general' | 'animators' | 'backup' | 'correction';
+export type SettingsSubTab = 'general' | 'users' | 'security' | 'animators' | 'backup' | 'correction';
 
 interface SettingsProps {
+  currentUser?: string;
   settings: AppSettings;
   setSettings: React.Dispatch<React.SetStateAction<AppSettings>>;
   learners: Learner[];
@@ -64,7 +75,256 @@ interface SettingsProps {
 
 type SubTab = SettingsSubTab;
 
+// Admin Security & Password Management Section
+const AdminSecuritySection: React.FC = () => {
+  const [currentUsername, setCurrentUsername] = useState('admin');
+  const [lastUpdated, setLastUpdated] = useState('');
+  
+  // Password Form
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+  
+  // Username Form
+  const [usernameInput, setUsernameInput] = useState('');
+
+  const [secMsg, setSecMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    getStoredAdminCredentials().then((creds) => {
+      setCurrentUsername(creds.username);
+      setUsernameInput(creds.username);
+      if (creds.updatedAt) {
+        setLastUpdated(new Date(creds.updatedAt).toLocaleDateString('ar-MA'));
+      }
+    });
+  }, []);
+
+  const handleChangePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSecMsg(null);
+
+    if (!currentPassword) {
+      setSecMsg({ type: 'error', text: 'يرجى إدخال كلمة المرور الحالية.' });
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      setSecMsg({ type: 'error', text: 'كلمة المرور الجديدة يجب أن تحتوي على 6 أحرف/عناصر على الأقل.' });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setSecMsg({ type: 'error', text: 'كلمة المرور الجديدة وتأكيدها غير متطابقين.' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await changeAdminPassword(currentPassword, newPassword);
+      if (res.success) {
+        setSecMsg({ type: 'success', text: res.message });
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+      } else {
+        setSecMsg({ type: 'error', text: res.message });
+      }
+    } catch {
+      setSecMsg({ type: 'error', text: 'حدث خطأ أثناء تغيير كلمة المرور.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleChangeUsernameSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSecMsg(null);
+
+    if (!usernameInput || usernameInput.trim().length < 3) {
+      setSecMsg({ type: 'error', text: 'اسم المستخدم يجب أن يتكون من 3 أحرف على الأقل.' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await changeAdminUsername(usernameInput.trim());
+      if (res.success) {
+        setSecMsg({ type: 'success', text: res.message });
+        setCurrentUsername(usernameInput.trim());
+      } else {
+        setSecMsg({ type: 'error', text: res.message });
+      }
+    } catch {
+      setSecMsg({ type: 'error', text: 'حدث خطأ أثناء تغيير اسم المستخدم.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-4xl">
+      {/* Account Info Banner */}
+      <div className="p-5 bg-slate-900 text-white rounded-2xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg border border-emerald-500/30 shrink-0">
+            <Shield className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-base font-extrabold flex items-center gap-2">
+              <span>حساب الإدارة الرئيسية</span>
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 font-bold border border-emerald-800">
+                Administrateur
+              </span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              اسم المستخدم الحالي: <strong className="text-white font-mono">{currentUsername}</strong>
+              {lastUpdated && ` · آخر تحديث: ${lastUpdated}`}
+            </p>
+          </div>
+        </div>
+
+        <div className="text-xs text-slate-400 bg-slate-800/80 px-3.5 py-2 rounded-xl border border-slate-700/80">
+          <span className="block text-emerald-400 font-bold">التشفير الحمايتي:</span>
+          <span>SHA-256 Hash With Salt</span>
+        </div>
+      </div>
+
+      {secMsg && (
+        <div className={`p-4 rounded-xl flex items-center gap-3 text-xs font-bold ${
+          secMsg.type === 'success' 
+            ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800' 
+            : 'bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-rose-800'
+        }`}>
+          {secMsg.type === 'success' ? <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" /> : <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />}
+          <span>{secMsg.text}</span>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Form: Change Password */}
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
+          <div className="flex items-center gap-2.5 pb-3 border-b border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-sm">
+            <KeyRound className="w-5 h-5 text-blue-600" />
+            <span>تغيير كلمة المرور الخاصة بالإدارة</span>
+          </div>
+
+          <form onSubmit={handleChangePasswordSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                كلمة المرور الحالية
+              </label>
+              <div className="relative">
+                <input
+                  type={showCurrentPass ? 'text' : 'password'}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono"
+                  dir="ltr"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPass(!showCurrentPass)}
+                  className="absolute left-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                كلمة المرور الجديدة
+              </label>
+              <div className="relative">
+                <input
+                  type={showNewPass ? 'text' : 'password'}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="أدخل كلمة مرور جديدة جيدة"
+                  className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono"
+                  dir="ltr"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPass(!showNewPass)}
+                  className="absolute left-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                >
+                  {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                تأكيد كلمة المرور الجديدة
+              </label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="إعادة إدخال كلمة المرور الجديدة"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono"
+                dir="ltr"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer shadow-xs"
+            >
+              <Save className="w-4 h-4" />
+              <span>تحديث كلمة المرور</span>
+            </button>
+          </form>
+        </div>
+
+        {/* Form: Change Username */}
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
+          <div className="flex items-center gap-2.5 pb-3 border-b border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold text-sm">
+            <User className="w-5 h-5 text-emerald-600" />
+            <span>تعديل اسم المستخدم (Login)</span>
+          </div>
+
+          <form onSubmit={handleChangeUsernameSubmit} className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                اسم المستخدم الجديد
+              </label>
+              <input
+                type="text"
+                value={usernameInput}
+                onChange={(e) => setUsernameInput(e.target.value)}
+                placeholder="مثال: admin"
+                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-mono font-bold"
+                dir="ltr"
+              />
+            </div>
+
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              تغيير اسم المستخدم يتطلب استخدام اسم المستخدم الجديد في المرة القادمة التي تقوم فيها بتسجيل الدخول.
+            </p>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer shadow-xs"
+            >
+              <Save className="w-4 h-4" />
+              <span>حفظ اسم المستخدم الجديد</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const Settings: React.FC<SettingsProps> = ({
+  currentUser = 'admin',
   settings,
   setSettings,
   learners,
@@ -298,6 +558,8 @@ export const Settings: React.FC<SettingsProps> = ({
 
   const tabs = [
     { id: 'general', label: 'إعدادات عامة', icon: <AppWindow className="w-4 h-4" /> },
+    { id: 'users', label: 'تدبير المستخدمين الإداريين', icon: <Users className="w-4 h-4" /> },
+    { id: 'security', label: 'أمان الحساب وكلمة المرور', icon: <Lock className="w-4 h-4" /> },
     { id: 'animators', label: 'تدبير المنشطين والمؤطرين', icon: <UserCheck className="w-4 h-4" /> },
     { id: 'backup', label: 'النسخ الاحتياطي', icon: <Database className="w-4 h-4" /> },
     { id: 'correction', label: 'تصحيح البيانات', icon: <ShieldCheck className="w-4 h-4" /> },
@@ -376,10 +638,49 @@ export const Settings: React.FC<SettingsProps> = ({
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   
-                  {/* School Name */}
-                  <div className="sm:col-span-2">
+                  {/* Official Header Fields */}
+                  <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      اسم المؤسسة
+                      الدولة (السطر الأول)
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.kingdom || 'المملكة المغربية'}
+                      onChange={(e) => setFormData({ ...formData, kingdom: e.target.value })}
+                      className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      القطاع / الوزارة (السطر الثاني)
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.ministry || 'وزارة التربية الوطنية والتعليم الأولي والتكوين المهني والتأهيل'}
+                      onChange={(e) => setFormData({ ...formData, ministry: e.target.value })}
+                      className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      المديرية الإقليمية (السطر الثالث)
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.delegation || 'المديرية الإقليمية الرباط'}
+                      onChange={(e) => setFormData({ ...formData, delegation: e.target.value })}
+                      className="w-full px-3 py-2 text-xs sm:text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                      اسم المؤسسة الرسمية (السطر الرابع)
                     </label>
                     <input
                       type="text"
@@ -707,6 +1008,10 @@ export const Settings: React.FC<SettingsProps> = ({
           </div>
         </>
       )}
+
+      {activeSubTab === 'users' && <AdminUsersManagement currentAdminUsername={currentUser} />}
+
+      {activeSubTab === 'security' && <AdminSecuritySection />}
 
       {activeSubTab === 'animators' && animators && setAnimators && (
         <AnimatorManagement

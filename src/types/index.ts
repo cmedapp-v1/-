@@ -149,6 +149,9 @@ export interface CommitmentRecord {
 }
 
 export interface AppSettings {
+  kingdom?: string;
+  ministry?: string;
+  delegation?: string;
   schoolName: string;
   schoolNameFull: string;
   schoolYear: string;
@@ -223,4 +226,57 @@ export interface InfirmaryVisit {
 }
 
 export type TabType = 'dashboard' | 'students' | 'animators' | 'schedule' | 'attendance' | 'tracking' | 'violations' | 'reports' | 'backup' | 'data_correction' | 'settings';
+
+export type RoleType = 'super_admin' | 'admin_user';
+export type UserAccountStatus = 'نشط' | 'غير نشط';
+
+export interface SectionPermissions {
+  view: boolean;
+  add: boolean;
+  edit: boolean;
+  delete: boolean;
+  export: boolean;
+}
+
+export type AppSectionKey = 
+  | 'students' 
+  | 'animators' 
+  | 'schedule' 
+  | 'attendance' 
+  | 'tracking' 
+  | 'violations' 
+  | 'reports' 
+  | 'settings' 
+  | 'users' 
+  | 'backup';
+
+export type UserPermissionsMap = Record<AppSectionKey, SectionPermissions>;
+
+export interface AdminUserAccount {
+  id: string; // e.g. "ADM-001"
+  fullName: string;
+  username: string; // Login name
+  passwordHash: string;
+  salt: string;
+  role: RoleType;
+  roleTitle: string; // e.g. "مدير المؤسسة", "حارس عام", "مقتصد"
+  phone?: string;
+  status: UserAccountStatus;
+  mustChangePasswordOnFirstLogin: boolean;
+  permissions: UserPermissionsMap;
+  createdAt: string;
+  updatedAt?: string;
+  lastLoginAt?: string;
+  notes?: string;
+}
+
+export interface AdminAuditLog {
+  id: string;
+  timestamp: string; // ISO String
+  performedBy: string; // Username
+  targetUsername?: string;
+  actionType: 'إنشاء حساب' | 'تعديل حساب' | 'إعادة تعيين كلمة المرور' | 'تغيير الحالة' | 'تحديث الصلاحيات' | 'حذف حساب' | 'تسجيل الدخول' | 'تغيير كلمة المرور الشخصية';
+  details: string;
+}
+
 

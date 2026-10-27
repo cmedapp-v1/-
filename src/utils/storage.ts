@@ -80,7 +80,27 @@ export const generateNextAnimatorNumber = (existingAnimators: Animator[]): strin
 export const getStoredSettings = (): AppSettings => {
   try {
     const data = localStorage.getItem(SETTINGS_KEY);
-    return data ? JSON.parse(data) : DEFAULT_SETTINGS;
+    if (!data) return DEFAULT_SETTINGS;
+    const parsed = JSON.parse(data);
+    
+    // Auto-migrate if ministry contains old name or if fields are missing
+    const ministryVal = (!parsed.ministry || parsed.ministry.includes('والرياضة'))
+      ? DEFAULT_SETTINGS.ministry
+      : parsed.ministry;
+
+    const delegationVal = (!parsed.delegation || parsed.delegation.includes('سيدي قاسم'))
+      ? DEFAULT_SETTINGS.delegation
+      : parsed.delegation;
+
+    return {
+      ...DEFAULT_SETTINGS,
+      ...parsed,
+      kingdom: parsed.kingdom || DEFAULT_SETTINGS.kingdom,
+      ministry: ministryVal,
+      delegation: delegationVal,
+      schoolName: DEFAULT_SETTINGS.schoolName,
+      schoolNameFull: DEFAULT_SETTINGS.schoolNameFull,
+    };
   } catch {
     return DEFAULT_SETTINGS;
   }

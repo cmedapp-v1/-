@@ -2398,11 +2398,10 @@ export const ViolationsManagement: React.FC<ViolationsManagementProps> = ({
 
             {/* Official Moroccan Institutional Header */}
             <div className="text-center space-y-1 border-b-2 border-slate-800 pb-4">
-              <p className="text-xs font-bold text-slate-700">المملكة المغربية</p>
-              <p className="text-xs font-bold text-slate-700">وزارة التربية الوطنية والتعليم الأولي والرياضة</p>
-              <p className="text-xs text-slate-600">الأكاديمية الجهوية للتربية والتكوين لجهة الرباط سلا القنيطرة</p>
-              <p className="text-xs text-slate-600">المديرية الإقليمية الرباط</p>
-              <h2 className="text-base font-black text-slate-900 mt-1">{settings.schoolName}</h2>
+              <p className="text-xs font-bold text-slate-700">{settings.kingdom || 'المملكة المغربية'}</p>
+              <p className="text-xs font-bold text-slate-700">{settings.ministry || 'وزارة التربية الوطنية والتعليم الأولي والتكوين المهني والتأهيل'}</p>
+              <p className="text-xs text-slate-600">{settings.delegation || 'المديرية الإقليمية الرباط'}</p>
+              <h2 className="text-base font-black text-slate-900 mt-1">{settings.schoolName || 'مدرسة الفرصة الثانية الجيل الجديد يعقوب المنصور'}</h2>
               <div className="mt-3 py-1.5 px-4 bg-slate-100 rounded-lg inline-block border border-slate-400">
                 <h1 className="text-sm font-black tracking-wide">
                   إشعار وتقرير مخالفة انضباطية رقم: {printNoticeViolation.violationNumber}

@@ -241,9 +241,9 @@ export const Reports: React.FC<ReportsProps> = ({
     
     // Header Info
     doc.setFontSize(10);
-    doc.text('Royaume du Maroc', 20, 15);
-    doc.text('Ministere de l\'Education Nationale', 20, 20);
-    doc.text(settings.schoolNameFull, 20, 25);
+    doc.text(settings.kingdom || 'Royaume du Maroc', 20, 15);
+    doc.text(settings.ministry || 'Ministere de l\'Education Nationale', 20, 20);
+    doc.text(`${settings.delegation || 'Direction Rabat'} - ${settings.schoolName || 'E2S Yaacoub Al Mansour'}`, 20, 25);
     
     if (activeTab === 'overview') {
       doc.setFontSize(16);

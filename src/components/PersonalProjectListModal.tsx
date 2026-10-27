@@ -206,11 +206,10 @@ export const PersonalProjectListModal: React.FC<PersonalProjectListModalProps> =
   // Export to Excel
   const exportToExcel = () => {
     const titleRows = [
-      ['المملكة المغربية'],
-      ['وزارة التربية الوطنية والتعليم الأولي والرياضة'],
-      ['الأكاديمية الجهوية للتربية والتكوين جهة الرباط - سلا - القنيطرة'],
-      ['المديرية الإقليمية بسيدي قاسم'],
-      [`${settings.schoolName} - ${settings.schoolNameFull}`],
+      [settings.kingdom || 'المملكة المغربية'],
+      [settings.ministry || 'وزارة التربية الوطنية والتعليم الأولي والتكوين المهني والتأهيل'],
+      [settings.delegation || 'المديرية الإقليمية الرباط'],
+      [settings.schoolName || 'مدرسة الفرصة الثانية الجيل الجديد يعقوب المنصور'],
       [''],
       ['لائحة المتعلمين حسب المشروع الشخصي'],
       [`السنة التكوينية / الدراسية: ${settings.schoolYear}`],
@@ -310,10 +309,10 @@ export const PersonalProjectListModal: React.FC<PersonalProjectListModalProps> =
     const logosHtml = `
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 12px;">
         <div style="text-align: right; line-height: 1.35; font-size: 9.5pt;">
-          <div style="font-weight: bold; font-size: 10.5pt; color: #0f172a;">المملكة المغربية</div>
-          <div style="font-weight: bold; color: #334155;">وزارة التربية الوطنية والتعليم الأولي والرياضة</div>
-          <div style="color: #475569;">الأكاديمية الجهوية للتربية والتكوين جهة الرباط - سلا - القنيطرة</div>
-          <div style="color: #475569;">المديرية الإقليمية بسيدي قاسم</div>
+          <div style="font-weight: bold; font-size: 10.5pt; color: #0f172a;">${settings.kingdom || 'المملكة المغربية'}</div>
+          <div style="font-weight: bold; color: #334155;">${settings.ministry || 'وزارة التربية الوطنية والتعليم الأولي والتكوين المهني والتأهيل'}</div>
+          <div style="color: #475569;">${settings.delegation || 'المديرية الإقليمية الرباط'}</div>
+          <div style="font-weight: bold; color: #0f172a;">${settings.schoolName || 'مدرسة الفرصة الثانية الجيل الجديد يعقوب المنصور'}</div>
         </div>
 
         <div style="text-align: center;">
@@ -740,10 +739,10 @@ export const PersonalProjectListModal: React.FC<PersonalProjectListModalProps> =
               
               {/* Ministry Block */}
               <div className="text-right text-xs leading-relaxed text-slate-800 dark:text-slate-200">
-                <div className="font-extrabold text-sm text-slate-900 dark:text-white">المملكة المغربية</div>
-                <div className="font-bold text-slate-700 dark:text-slate-300">وزارة التربية الوطنية والتعليم الأولي والرياضة</div>
-                <div className="text-slate-600 dark:text-slate-400">الأكاديمية الجهوية للتربية والتكوين جهة الرباط - سلا - القنيطرة</div>
-                <div className="text-slate-600 dark:text-slate-400">المديرية الإقليمية بسيدي قاسم</div>
+                <div className="font-extrabold text-sm text-slate-900 dark:text-white">{settings.kingdom || 'المملكة المغربية'}</div>
+                <div className="font-bold text-slate-700 dark:text-slate-300">{settings.ministry || 'وزارة التربية الوطنية والتعليم الأولي والتكوين المهني والتأهيل'}</div>
+                <div className="text-slate-600 dark:text-slate-400">{settings.delegation || 'المديرية الإقليمية الرباط'}</div>
+                <div className="font-extrabold text-sm text-slate-900 dark:text-white pt-0.5">{settings.schoolName || 'مدرسة الفرصة الثانية الجيل الجديد يعقوب المنصور'}</div>
               </div>
 
               {/* Center Logo & Title */}

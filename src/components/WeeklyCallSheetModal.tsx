@@ -291,10 +291,9 @@ export const WeeklyCallSheetModal: React.FC<WeeklyCallSheetModalProps> = ({
             <div className="flex items-center justify-between gap-4">
               
               <div className="text-right text-[11px] font-bold text-slate-800 space-y-0.5 leading-tight">
-                <p className="font-extrabold text-xs">المملكة المغربية</p>
-                <p>وزارة التربية الوطنية والتعليم الأولي والرياضة</p>
-                <p>الأكاديمية الجهوية للتربية والتكوين لجهة الرباط سلا القنيطرة</p>
-                <p>المديرية الإقليمية الرباط</p>
+                <p className="font-extrabold text-xs">{settings.kingdom || 'المملكة المغربية'}</p>
+                <p>{settings.ministry || 'وزارة التربية الوطنية والتعليم الأولي والتكوين المهني والتأهيل'}</p>
+                <p>{settings.delegation || 'المديرية الإقليمية الرباط'}</p>
               </div>
 
               <div className="w-14 h-14 rounded-2xl bg-emerald-700 text-white flex flex-col items-center justify-center font-black p-2 shadow-sm shrink-0">

@@ -36,8 +36,19 @@ import { Backup } from './components/Backup';
 import { Settings, SettingsSubTab } from './components/Settings';
 import { OfficialHeader } from './components/OfficialHeader';
 import { DataCorrection } from './components/DataCorrection';
+import { Login } from './components/Login';
+import { MustChangePasswordModal } from './components/MustChangePasswordModal';
+import { initializeAdminAccount, getStoredAuthSession, logoutAdminSession, AuthSession } from './utils/auth';
 
 export default function App() {
+  // Authentication Session State
+  const [authSession, setAuthSession] = useState<AuthSession | null>(getStoredAuthSession);
+
+  // Initialize default admin account if not already created
+  useEffect(() => {
+    initializeAdminAccount();
+  }, []);
+
   // Dark Mode
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -192,9 +203,44 @@ export default function App() {
     return count;
   }, [learners, attendance, settings.alertThreshold]);
 
+  const handleLoginSuccess = () => {
+    setAuthSession(getStoredAuthSession());
+    setActiveTab('dashboard');
+  };
+
+  const handleLogout = () => {
+    logoutAdminSession();
+    setAuthSession(null);
+  };
+
+  // If user is not authenticated, render Login Page
+  if (!authSession || !authSession.isAuthenticated) {
+    return (
+      <Login
+        settings={settings}
+        onLoginSuccess={handleLoginSuccess}
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex font-sans transition-colors duration-200">
       
+      {/* Forced Password Change Modal for First Login */}
+      {authSession.mustChangePasswordOnFirstLogin && (
+        <MustChangePasswordModal
+          userId={authSession.userId}
+          username={authSession.username}
+          fullName={authSession.fullName}
+          onSuccess={() => {
+            const updatedSession = getStoredAuthSession();
+            if (updatedSession) setAuthSession(updatedSession);
+          }}
+        />
+      )}
+
       {/* Sidebar Navigation */}
       <Sidebar
         activeTab={activeTab}
@@ -202,6 +248,12 @@ export default function App() {
         settings={settings}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
+        currentUser={authSession.username}
+        userFullName={authSession.fullName}
+        userRoleTitle={authSession.roleTitle}
+        userRole={authSession.role}
+        userPermissions={authSession.permissions}
+        onLogout={handleLogout}
       />
 
       {/* Main Viewport Content */}
@@ -315,6 +367,7 @@ export default function App() {
 
         {activeTab === 'settings' && (
           <Settings
+            currentUser={authSession.username}
             settings={settings}
             setSettings={setSettings}
             learners={learners}
